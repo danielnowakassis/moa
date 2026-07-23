@@ -166,12 +166,6 @@ public class iPFIClassifier extends AbstractClassifier implements MultiClassClas
     public void resetLearningImpl() {
         this.classifier = ((Classifier) getPreparedClassOption(this.baseLearnerOption)).copy();
 
-        // The importance estimation queries the base learner once per feature per perturbation,
-        // so let ensembles that support it use every available core.
-        if (this.classifier instanceof AdaptiveRandomForest) {
-            ((AdaptiveRandomForest) this.classifier).numberOfJobsOption.setValue(-1);
-        }
-
         if (this.getModelContext() != null) {
             this.classifier.setModelContext(this.getModelContext());
         }
