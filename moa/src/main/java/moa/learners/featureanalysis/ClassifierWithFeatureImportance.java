@@ -25,6 +25,7 @@ import com.github.javacliparser.IntOption;
 import com.yahoo.labs.samoa.instances.Instance;
 import moa.classifiers.AbstractClassifier;
 import moa.classifiers.MultiClassClassifier;
+import moa.classifiers.Regressor;
 import moa.classifiers.meta.AdaptiveRandomForest;
 import moa.core.Measurement;
 import moa.core.Utils;
@@ -64,7 +65,7 @@ public class ClassifierWithFeatureImportance extends AbstractClassifier
 
     public ClassOption featureImportanceLearnerOption = new ClassOption("featureImportanceLearner", 'l',
             "Learner used to build the model from which the feature importances are extracted",
-            FeatureImportanceClassifier.class, "moa.learners.featureanalysis.FeatureImportanceHoeffdingTree");
+            FeatureImportanceLearner.class, "moa.learners.featureanalysis.FeatureImportanceHoeffdingTree");
 
     public FlagOption doNotNormalizeFeatureScoreOption = new FlagOption("doNotNormalizeFeatureScore", 'n',
             "If set the feature importances will not be normalized");
@@ -84,7 +85,7 @@ public class ClassifierWithFeatureImportance extends AbstractClassifier
     protected PrintStream debugStream;
 
     protected long instancesSeen = 0;
-    protected FeatureImportanceClassifier featureImportanceClassifierLearner;
+    protected FeatureImportanceLearner featureImportanceClassifierLearner;
 
     protected double mean = -1.0;
     protected double median = -1.0;
@@ -113,7 +114,14 @@ public class ClassifierWithFeatureImportance extends AbstractClassifier
     public void resetLearningImpl() {
         this.instancesSeen = 0;
         this.featureImportanceClassifierLearner = null;
-        this.featureImportanceClassifierLearner = (FeatureImportanceClassifier) getPreparedClassOption(this.featureImportanceLearnerOption);
+        this.featureImportanceClassifierLearner = (FeatureImportanceLearner) getPreparedClassOption(this.featureImportanceLearnerOption);
+        // FeatureImportanceLearner covers regressors as well, so they reach the option chooser
+        // here even though this wrapper reads the votes as a class distribution.
+        if (this.featureImportanceClassifierLearner instanceof Regressor) {
+            throw new IllegalArgumentException(this.getClass().getName() + " needs a classifier, "
+                    + "but " + this.featureImportanceClassifierLearner.getClass().getName()
+                    + " is a regressor.");
+        }
         this.featureImportanceClassifierLearner.resetLearning();
         this.createDebugOutputFile();
     }

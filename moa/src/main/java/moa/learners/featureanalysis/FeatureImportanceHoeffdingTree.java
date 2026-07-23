@@ -32,7 +32,7 @@ import moa.options.ClassOption;
  * @version $Revision: 1 $
  */
 public class FeatureImportanceHoeffdingTree extends AbstractClassifier implements MultiClassClassifier,
-        CapabilitiesHandler, FeatureImportanceClassifier {
+        CapabilitiesHandler, FeatureImportanceLearner {
 
     public ClassOption treeLearnerOption = new ClassOption("treeLearner", 'l',
             "Decision Tree learner.", HoeffdingTree.class,

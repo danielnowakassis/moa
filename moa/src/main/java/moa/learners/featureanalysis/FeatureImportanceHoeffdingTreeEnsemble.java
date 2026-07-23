@@ -32,7 +32,7 @@ import moa.options.ClassOption;
  * @version $Revision: 1 $
  */
 public class FeatureImportanceHoeffdingTreeEnsemble extends AbstractClassifier implements MultiClassClassifier,
-        CapabilitiesHandler, FeatureImportanceClassifier {
+        CapabilitiesHandler, FeatureImportanceLearner {
 
     public ClassOption ensembleLearnerOption = new ClassOption("ensembleLearner", 'l',
             "Ensemble learner to train and analyze.", Classifier.class,
