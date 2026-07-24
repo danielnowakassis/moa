@@ -57,7 +57,7 @@ import moa.options.ClassOption;
  * the default for that reason, and {@code -z} additionally divides every error by a running
  * estimate of the standard deviation of the target, which makes the scores scale-free.</p>
  *
- * <p>See details in:<br> Fabian Fumagalli, Maximilian Muschalik, Eyke H&uuml;llermeier,
+ * <p>See details in:<br> Fabian Fumagalli, Maximilian Muschalik, Eyke Hüllermeier,
  * Barbara Hammer. Incremental Permutation Feature Importance (iPFI): Towards Online
  * Explanations on Data Streams. Machine Learning, 2023.</p>
  *
