@@ -1,4 +1,4 @@
-package moa.classifiers.meta.AutoML;
+package moa.classifiers.AutoML.AutoClass;
 
 import com.yahoo.labs.samoa.instances.Attribute;
 

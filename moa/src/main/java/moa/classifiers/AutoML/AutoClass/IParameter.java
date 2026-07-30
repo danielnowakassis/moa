@@ -1,4 +1,4 @@
-package moa.classifiers.meta.AutoML;
+package moa.classifiers.AutoML.AutoClass;
 
 // interface allows us to maintain a single list of parameters
 public interface IParameter {

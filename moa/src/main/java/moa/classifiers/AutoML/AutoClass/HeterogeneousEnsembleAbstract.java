@@ -17,7 +17,7 @@
  *    along with this program. If not, see <http://www.gnu.org/licenses/>.
  *    
  */
-package moa.classifiers.meta.AutoML;
+package moa.classifiers.AutoML.AutoClass;
 
 import com.github.javacliparser.FlagOption;
 import com.github.javacliparser.IntOption;

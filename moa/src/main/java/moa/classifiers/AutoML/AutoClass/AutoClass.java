@@ -1,4 +1,4 @@
-package moa.classifiers.meta.AutoML;
+package moa.classifiers.AutoML.AutoClass;
 
 import com.github.javacliparser.FileOption;
 import com.google.gson.Gson;
@@ -9,7 +9,6 @@ import com.yahoo.labs.samoa.instances.InstancesHeader;
 import moa.classifiers.Classifier;
 import moa.classifiers.MultiClassClassifier;
 import moa.classifiers.meta.AdaptiveRandomForestRegressor;
-import moa.core.DoubleVector;
 import moa.core.Measurement;
 import moa.core.ObjectRepository;
 import moa.tasks.TaskMonitor;

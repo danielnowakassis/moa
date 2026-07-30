@@ -1,4 +1,4 @@
-package moa.classifiers.meta.AutoML;
+package moa.classifiers.AutoML.AutoClass;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 //import umontreal.iro.lecuyer.probdist.NormalDist;

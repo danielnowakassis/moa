@@ -1,20 +1,22 @@
-package moa.classifiers.meta.AutoML;
+package moa.classifiers.AutoML.AutoClass;
 
 import com.yahoo.labs.samoa.instances.Attribute;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
-// the representation of a boolean / binary / flag parameter
-public class BooleanParameter implements IParameter {
+// the representation of a categorical / nominal parameter
+public class CategoricalParameter implements IParameter {
 	private String parameter;
 	private int numericValue;
 	private String value;
-	private String[] range = { "false", "true" };
+	private String[] range;
 	private Attribute attribute;
 	private ArrayList<Double> probabilities;
 	private boolean optimise;
 
-	public BooleanParameter(BooleanParameter x) {
+	public CategoricalParameter(CategoricalParameter x) {
 		this.parameter = x.parameter;
 		this.numericValue = x.numericValue;
 		this.value = x.value;
@@ -25,46 +27,39 @@ public class BooleanParameter implements IParameter {
 			this.range = x.range.clone();
 			this.probabilities = new ArrayList<Double>(x.probabilities);
 		}
-
 	}
 
-	public BooleanParameter(ParameterConfiguration x) {
+	public CategoricalParameter(ParameterConfiguration x) {
 		this.parameter = x.parameter;
 		this.value = String.valueOf(x.value);
-		for (int i = 0; i < this.range.length; i++) {
-			if (this.range[i].equals(this.value)) {
-				this.numericValue = i; // get index of init value
-			}
-		}
-		this.attribute = new Attribute(x.parameter);
+		this.attribute = new Attribute(x.parameter, Arrays.asList(range));
 		this.optimise = x.optimise;
 
 		if(this.optimise){
-			this.probabilities = new ArrayList<Double>(2);
-			for (int i = 0; i < 2; i++) {
-				this.probabilities.add(0.5); // equal probabilities
+			this.range = new String[x.range.length];
+			for (int i = 0; i < x.range.length; i++) {
+				range[i] = String.valueOf(x.range[i]);
+				if (this.range[i].equals(this.value)) {
+					this.numericValue = i; // get index of init value
+				}
+			}
+			this.probabilities = new ArrayList<Double>(x.range.length);
+			for (int i = 0; i < x.range.length; i++) {
+				this.probabilities.add(1.0 / x.range.length); // equal probabilities
 			}
 		}
 	}
 
-	public BooleanParameter copy() {
-		return new BooleanParameter(this);
+	public CategoricalParameter copy() {
+		return new CategoricalParameter(this);
 	}
 
 	public String getCLIString() {
-		// if option is set
-		if (this.numericValue == 1) {
-			return ("-" + this.parameter); // only the parameter
-		}
-		return "";
+		return ("-" + this.parameter + " " + this.value);
 	}
 
 	public String getCLIValueString() {
-		if (this.numericValue == 1) {
-			return ("");
-		} else {
-			return (null);
-		}
+		return ("" + this.value);
 	}
 
 	public double getValue() {
@@ -95,13 +90,13 @@ public class BooleanParameter implements IParameter {
 		for (int i = 0; i < this.probabilities.size(); i++) {
 			map.put(i, this.probabilities.get(i));
 		}
-
 		// update configuration
 		this.numericValue = AutoClass.sampleProportionally(map, true);
 		String newValue = this.range[this.numericValue];
+
 		if (verbose >= 3) {
 			System.out
-					.print("Sample new configuration for boolean parameter -" + this.parameter + " with probabilities");
+					.print("Sample new configuration for nominal parameter -" + this.parameter + "with probabilities");
 			for (int i = 0; i < this.probabilities.size(); i++) {
 				System.out.print(" " + this.probabilities.get(i));
 			}
@@ -110,12 +105,14 @@ public class BooleanParameter implements IParameter {
 		this.value = newValue;
 
 		// adapt distribution
+		// TODO not directly transferable from irace: (1-((iter -1) / maxIter))
 		// this.probabilities.set(this.numericValue,
 		// this.probabilities.get(this.numericValue) + (1.0/iter));
 		this.probabilities.set(this.numericValue,
 				this.probabilities.get(this.numericValue) * (2 - Math.pow(2, -1 * lambda)));
 
-		// divide by sum
+		// divide by sum (TODO is this even necessary with our proportional sampling
+		// strategy?)
 		double sum = 0.0;
 		for (int i = 0; i < this.probabilities.size(); i++) {
 			sum += this.probabilities.get(i);

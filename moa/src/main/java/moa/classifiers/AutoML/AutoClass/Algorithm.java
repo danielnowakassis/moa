@@ -1,4 +1,4 @@
-package moa.classifiers.meta.AutoML;
+package moa.classifiers.AutoML.AutoClass;
 
 import com.github.javacliparser.Option;
 import com.github.javacliparser.Options;
