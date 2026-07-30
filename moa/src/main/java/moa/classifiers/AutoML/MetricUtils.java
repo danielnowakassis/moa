@@ -119,6 +119,12 @@ public final class MetricUtils {
         evaluator.f1PerClassOption.setValue(true);
         evaluator.precisionPerClassOption.setValue(true);
         evaluator.recallPerClassOption.setValue(true);
+        // A freshly constructed evaluator allocates its estimators only in
+        // reset(), so getPerformanceMeasurements() would throw on one that has
+        // not scored an instance yet. That happens whenever the search state is
+        // read at an evaluation window boundary, just after candidates were
+        // respawned with new evaluators.
+        evaluator.reset();
     }
 
     public static double getScore(Measurement[] measurements, int metricChoice) {

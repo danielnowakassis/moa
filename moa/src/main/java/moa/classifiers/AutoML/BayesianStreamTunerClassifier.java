@@ -21,6 +21,7 @@ import com.github.javacliparser.FileOption;
 import com.github.javacliparser.FlagOption;
 import com.github.javacliparser.IntOption;
 import com.github.javacliparser.MultiChoiceOption;
+import com.github.javacliparser.StringOption;
 import com.yahoo.labs.samoa.instances.Attribute;
 import com.yahoo.labs.samoa.instances.DenseInstance;
 import com.yahoo.labs.samoa.instances.Instance;
@@ -79,6 +80,10 @@ public class BayesianStreamTunerClassifier extends AbstractClassifier
 
     public FileOption configurationFileOption = new FileOption("configurationFile", 'f',
             "Search space in JSON format.", null, ".json", false);
+
+    public StringOption searchSpaceOption = new StringOption("searchSpace", 's',
+            "Search space as inline JSON. Takes precedence over configurationFile when set,"
+            + " so that a caller holding the space in memory need not write a file.", "");
 
     public IntOption gracePeriodOption = new IntOption("gracePeriod", 'g',
             "Number of instances between model update cycles; also the number of recent"
@@ -216,7 +221,7 @@ public class BayesianStreamTunerClassifier extends AbstractClassifier
 
     public void setConfigurations() {
         try {
-            ConfigurationSpace space = ConfigurationSpace.fromFile(configurationFileOption.getValue());
+            ConfigurationSpace space = ConfigurationSpace.resolve(configurationFileOption.getValue(), searchSpaceOption.getValue());
             this.configurator = new LearnerConfigurator(space);
             this.configurator.validate();
 
@@ -304,7 +309,7 @@ public class BayesianStreamTunerClassifier extends AbstractClassifier
             // Fail fast: a swallowed error here leaves candidates/surrogate null and
             // surfaces later as a confusing NPE far from the real cause.
             throw new RuntimeException(
-                    "Failed to load tuner configuration from " + configurationFileOption.getValue(), e);
+                    "Failed to load tuner configuration from " + ConfigurationSpace.describeSource(configurationFileOption.getValue(), searchSpaceOption.getValue()), e);
         }
     }
 

@@ -22,6 +22,7 @@ import com.github.javacliparser.FlagOption;
 import com.github.javacliparser.FloatOption;
 import com.github.javacliparser.IntOption;
 import com.github.javacliparser.MultiChoiceOption;
+import com.github.javacliparser.StringOption;
 import com.yahoo.labs.samoa.instances.Instance;
 import moa.capabilities.CapabilitiesHandler;
 import moa.classifiers.AbstractClassifier;
@@ -60,6 +61,10 @@ public class SSPTRegressor extends AbstractClassifier implements Regressor,
 
     public FileOption configurationFileOption = new FileOption("configurationFile", 'f',
             "Search space in JSON format.", null, ".json", false);
+
+    public StringOption searchSpaceOption = new StringOption("searchSpace", 's',
+            "Search space as inline JSON. Takes precedence over configurationFile when set,"
+            + " so that a caller holding the space in memory need not write a file.", "");
 
     public IntOption gracePeriodOption = new IntOption("gracePeriod", 'g',
             "Number of instances between simplex updates.", 1000, 1, Integer.MAX_VALUE);
@@ -215,12 +220,12 @@ public class SSPTRegressor extends AbstractClassifier implements Regressor,
     @Override
     public void setConfigurations() {
         try {
-            this.space = ConfigurationSpace.fromFile(configurationFileOption.getValue());
+            this.space = ConfigurationSpace.resolve(configurationFileOption.getValue(), searchSpaceOption.getValue());
             this.configurator = new LearnerConfigurator(this.space);
             this.configurator.validate();
         } catch (Exception e) {
             throw new IllegalStateException("Could not set up " + getClass().getSimpleName()
-                    + " from \"" + configurationFileOption.getValue() + "\": " + e.getMessage(), e);
+                    + " from " + ConfigurationSpace.describeSource(configurationFileOption.getValue(), searchSpaceOption.getValue()) + ": " + e.getMessage(), e);
         }
     }
 
@@ -640,7 +645,7 @@ public class SSPTRegressor extends AbstractClassifier implements Regressor,
     }
 
     @Override
-    public int getNumberOfCandidates() { return 3; }
+    public int getNumberOfCandidates() { return simplex == null ? 0 : simplex.length; }
 
     @Override
     public long getStatesEvaluatedCount() { return instanceCount / gracePeriodOption.getValue(); }

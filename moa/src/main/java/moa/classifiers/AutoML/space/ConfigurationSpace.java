@@ -73,9 +73,36 @@ public class ConfigurationSpace implements Serializable {
         this.parameters = parameters;
     }
 
+    /**
+     * The search space a tuner should use, given both of the ways one can be
+     * supplied: inline JSON wins over a file when set, so that a caller holding
+     * the space in memory - the CapyMOA wrappers, or a script - never has to
+     * write a temporary file just to satisfy the {@code -f} option.
+     *
+     * @param path path from the {@code configurationFile} option, may be null
+     * @param json JSON from the {@code searchSpace} option, may be null or empty
+     */
+    public static ConfigurationSpace resolve(String path, String json) throws IOException {
+        if (json != null && !json.trim().isEmpty()) {
+            return fromString(json);
+        }
+        return fromFile(path);
+    }
+
+    /**
+     * How to refer to the search space in an error message, matching whichever
+     * of the two options {@link #resolve} would have read.
+     */
+    public static String describeSource(String path, String json) {
+        if (json != null && !json.trim().isEmpty()) return "the inline search space";
+        if (path == null || path.trim().isEmpty()) return "(no search space given)";
+        return "\"" + path + "\"";
+    }
+
     public static ConfigurationSpace fromFile(String path) throws IOException {
         if (path == null || path.trim().isEmpty()) {
-            throw new IOException("No configuration file given. Set the -f option to a search space JSON file.");
+            throw new IOException("No search space given. Set -f to a search space JSON file,"
+                    + " or -s to the search space JSON itself.");
         }
         File file = new File(path);
         if (!file.isFile()) {

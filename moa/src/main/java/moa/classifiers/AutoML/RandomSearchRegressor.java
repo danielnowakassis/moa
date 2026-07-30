@@ -21,6 +21,7 @@ import com.github.javacliparser.FileOption;
 import com.github.javacliparser.FlagOption;
 import com.github.javacliparser.IntOption;
 import com.github.javacliparser.MultiChoiceOption;
+import com.github.javacliparser.StringOption;
 import com.yahoo.labs.samoa.instances.Instance;
 import moa.capabilities.CapabilitiesHandler;
 import moa.classifiers.AbstractClassifier;
@@ -61,6 +62,10 @@ public class RandomSearchRegressor extends AbstractClassifier implements Regress
 
     public FileOption configurationFileOption = new FileOption("configurationFile", 'f',
             "Search space in JSON format.", null, ".json", false);
+
+    public StringOption searchSpaceOption = new StringOption("searchSpace", 's',
+            "Search space as inline JSON. Takes precedence over configurationFile when set,"
+            + " so that a caller holding the space in memory need not write a file.", "");
 
     public IntOption gracePeriodOption = new IntOption("gracePeriod", 'g',
             "Number of instances between candidate evaluations.", 1000, 1, Integer.MAX_VALUE);
@@ -234,7 +239,7 @@ public class RandomSearchRegressor extends AbstractClassifier implements Regress
         try {
             this.numericalParameters = 0;
 
-            ConfigurationSpace space = ConfigurationSpace.fromFile(this.configurationFileOption.getValue());
+            ConfigurationSpace space = ConfigurationSpace.resolve(this.configurationFileOption.getValue(), this.searchSpaceOption.getValue());
             this.configurator = new LearnerConfigurator(space);
             this.configurator.validate();
 
@@ -298,7 +303,7 @@ public class RandomSearchRegressor extends AbstractClassifier implements Regress
 
         } catch (Exception e) {
             throw new IllegalStateException("Could not set up " + getClass().getSimpleName()
-                    + " from \"" + this.configurationFileOption.getValue() + "\": " + e.getMessage(), e);
+                    + " from " + ConfigurationSpace.describeSource(this.configurationFileOption.getValue(), this.searchSpaceOption.getValue()) + ": " + e.getMessage(), e);
         }
     }
 
