@@ -1,6 +1,5 @@
 /*
  *    BayesianLinearRegression.java
- *    Port of River's BayesianLinearRegression to MOA.
  *    Based on Bishop's Pattern Recognition and Machine Learning (2006), equations 3.50-3.59.
  *
  *    This program is free software; you can redistribute it and/or modify
@@ -33,8 +32,7 @@ public class BayesianLinearRegression extends AbstractClassifier implements Regr
     @Override
     public String getPurposeString() {
         return "Bayesian linear regression. Does not require feature scaling. "
-                + "Supports concept drift via the smoothing parameter. "
-                + "Port of River's BayesianLinearRegression.";
+                + "Supports concept drift via the smoothing parameter. ";
     }
 
     public FloatOption alphaOption = new FloatOption("alpha", 'a',
