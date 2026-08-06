@@ -35,7 +35,7 @@ import java.util.List;
  * The search space shared by every AutoML method: the CLI string of the learner
  * being tuned, plus the list of tunable hyperparameters.
  *
- * <p>Expected JSON, as produced by hand or by the CapyMOA wrappers:
+ * <p>Expected JSON:
  *
  * <pre>
  * {
@@ -76,8 +76,8 @@ public class ConfigurationSpace implements Serializable {
     /**
      * The search space a tuner should use, given both of the ways one can be
      * supplied: inline JSON wins over a file when set, so that a caller holding
-     * the space in memory - the CapyMOA wrappers, or a script - never has to
-     * write a temporary file just to satisfy the {@code -f} option.
+     * the space in memory - a script, say - never has to write a temporary file
+     * just to satisfy the {@code -f} option.
      *
      * @param path path from the {@code configurationFile} option, may be null
      * @param json JSON from the {@code searchSpace} option, may be null or empty

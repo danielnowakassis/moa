@@ -71,7 +71,7 @@ public class SSPTClassifier extends AbstractClassifier implements MultiClassClas
             "Search space as inline JSON. Takes precedence over configurationFile when set,"
             + " so that a caller holding the space in memory need not write a file.", "");
 
-    public IntOption gracePeriodOption = new IntOption("gracePeriod", 'g',
+    public IntOption periodicityOption = new IntOption("periodicity", 'g',
             "Number of instances between simplex updates.", 1000, 1, Integer.MAX_VALUE);
 
     public FloatOption convergenceSphereOption = new FloatOption("convergenceSphere", 'c',
@@ -127,6 +127,12 @@ public class SSPTClassifier extends AbstractClassifier implements MultiClassClas
         void addResult(InstanceExample example, double[] votes) {
             evaluator.addResult(example, votes);
             instancesSeen++;
+        }
+
+        /** Forget what this entry scored, so a fresh window starts even. */
+        void resetEvaluation() {
+            evaluator.reset();
+            instancesSeen = 0;
         }
     }
 
@@ -375,10 +381,10 @@ public class SSPTClassifier extends AbstractClassifier implements MultiClassClas
             }
         }
 
-        if (evaluationInstances >= gracePeriodOption.getValue()) {
+        if (evaluationInstances >= periodicityOption.getValue()) {
             evaluationInstances = 0;
-            updateSimplex();
-            if (checkConvergence()) {
+            boolean moved = updateSimplex();
+            if (moved && checkConvergence()) {
                 if (verboseOption.isSet())
                     System.out.println("SSPT: Converged at instance " + instanceCount);
                 converged = true;
@@ -388,16 +394,42 @@ public class SSPTClassifier extends AbstractClassifier implements MultiClassClas
 
     // ========== SIMPLEX UPDATE ==========
 
-    private void updateSimplex() {
-        sortSimplex();
-        lastCentroid = computeCentroid();
-
+    /**
+     * Advances the simplex, alternating between laying down the Nelder-Mead
+     * candidate points and choosing among them.
+     *
+     * <p>The two phases must be separate windows. {@link #createExpanded()}
+     * builds the reflection, expansion, contraction, shrink and midpoint
+     * models but trains none of them, and
+     * {@link #applyNelderMeadOperators()} ranks them by measured performance -
+     * so applying the operators in the same call that creates the points
+     * compares six models that have seen no instances at all. Every
+     * comparison then fails, the operators fall through to their last branch,
+     * and the simplex is overwritten with untrained shrink and midpoint models
+     * on every update, whatever the data says.
+     *
+     * <p>Splitting the phases lets the candidate points train alongside the
+     * vertices for a full window first, which is what makes the choice between
+     * them meaningful.
+     *
+     * @return whether the simplex moved, i.e. whether this call applied
+     *         the operators rather than laying the candidate points down
+     */
+    private boolean updateSimplex() {
         if (expanded == null || expanded.isEmpty()) {
+            sortSimplex();
+            lastCentroid = computeCentroid();
             expanded = createExpanded();
+            // The vertices have been accumulating since they were created and
+            // the candidate points have seen nothing, so the next window is
+            // scored from a common start for all nine models.
+            for (SimplexEntry vertex : simplex) vertex.resetEvaluation();
+            return false;
         }
 
         applyNelderMeadOperators();
         expanded = null;
+        return true;
     }
 
     private void sortSimplex() {
@@ -666,13 +698,13 @@ public class SSPTClassifier extends AbstractClassifier implements MultiClassClas
     public int getNumberOfCandidates() { return simplex == null ? 0 : simplex.length; }
 
     @Override
-    public long getStatesEvaluatedCount() { return instanceCount / gracePeriodOption.getValue(); }
+    public long getStatesEvaluatedCount() { return instanceCount / periodicityOption.getValue(); }
 
     @Override
     public int getEvaluationInstancesCount() { return evaluationInstances; }
 
     @Override
-    public int getGracePeriod() { return gracePeriodOption.getValue(); }
+    public int getPeriodicity() { return periodicityOption.getValue(); }
 
     @Override
     public Classifier getMainClassifier() { return simplex[0].model; }

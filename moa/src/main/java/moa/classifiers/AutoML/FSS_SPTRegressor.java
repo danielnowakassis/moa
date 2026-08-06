@@ -69,7 +69,7 @@ public class FSS_SPTRegressor extends AbstractClassifier implements Regressor,
             "Search space as inline JSON. Takes precedence over configurationFile when set,"
             + " so that a caller holding the space in memory need not write a file.", "");
 
-    public IntOption gracePeriodOption = new IntOption("gracePeriod", 'g',
+    public IntOption periodicityOption = new IntOption("periodicity", 'g',
             "Number of instances between FSS school updates.", 1000, 2, Integer.MAX_VALUE);
 
     public MultiChoiceOption metricOption = new MultiChoiceOption("metric", 'm',
@@ -358,7 +358,7 @@ public class FSS_SPTRegressor extends AbstractClassifier implements Regressor,
                 throw new RuntimeException("Could not call invokeAll() on training threads.");
             }
         }
-        int halfPeriod = gracePeriodOption.getValue() / 2;
+        int halfPeriod = periodicityOption.getValue() / 2;
 
         // Phase 1 (halfway): assess improvement, apply individual movement
         if (evaluationInstances == halfPeriod) {
@@ -369,7 +369,7 @@ public class FSS_SPTRegressor extends AbstractClassifier implements Regressor,
         }
 
         // Phase 2 (full period): feeding, instinctive, volitional movements
-        if (evaluationInstances >= gracePeriodOption.getValue()) {
+        if (evaluationInstances >= periodicityOption.getValue()) {
             evaluationInstances = 0;
             sortSchool();
             double weightChange = feeding();
@@ -674,13 +674,13 @@ public class FSS_SPTRegressor extends AbstractClassifier implements Regressor,
     public int getNumberOfCandidates() { return numEstimatorsOption.getValue(); }
 
     @Override
-    public long getStatesEvaluatedCount() { return instanceCount / gracePeriodOption.getValue(); }
+    public long getStatesEvaluatedCount() { return instanceCount / periodicityOption.getValue(); }
 
     @Override
     public int getEvaluationInstancesCount() { return evaluationInstances; }
 
     @Override
-    public int getGracePeriod() { return gracePeriodOption.getValue(); }
+    public int getPeriodicity() { return periodicityOption.getValue(); }
 
     @Override
     public Classifier getMainClassifier() { return getBestFish().model; }

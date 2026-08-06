@@ -85,7 +85,7 @@ public class BayesianStreamTunerClassifier extends AbstractClassifier
             "Search space as inline JSON. Takes precedence over configurationFile when set,"
             + " so that a caller holding the space in memory need not write a file.", "");
 
-    public IntOption gracePeriodOption = new IntOption("gracePeriod", 'g',
+    public IntOption periodicityOption = new IntOption("periodicity", 'g',
             "Number of instances between model update cycles; also the number of recent"
             + " instances kept to derive the surrogate's stream statistics.",
             1000, 1, Integer.MAX_VALUE);
@@ -346,7 +346,7 @@ public class BayesianStreamTunerClassifier extends AbstractClassifier
 
     private void initDataWindow(int numFeatures) {
         this.windowFeatures = numFeatures;
-        this.dataWindow = new double[gracePeriodOption.getValue()][numFeatures];
+        this.dataWindow = new double[periodicityOption.getValue()][numFeatures];
         this.windowHead = 0;
         this.windowCount = 0;
     }
@@ -443,7 +443,7 @@ public class BayesianStreamTunerClassifier extends AbstractClassifier
                 return (mu - bestF) * normalCDF(z) + sigma * normalPDF(z);
             }
             default: { // UCB
-                double kappa = Math.max(0.1, 2.0 * (1.0 - instanceCount / (10.0 * gracePeriodOption.getValue())));
+                double kappa = Math.max(0.1, 2.0 * (1.0 - instanceCount / (10.0 * periodicityOption.getValue())));
                 return mu + kappa * sigma;
             }
         }
@@ -493,7 +493,7 @@ public class BayesianStreamTunerClassifier extends AbstractClassifier
         }
 
         instanceCount++;
-        if (instanceCount % gracePeriodOption.getValue() == 0) {
+        if (instanceCount % periodicityOption.getValue() == 0) {
             updateModels();
         }
 
@@ -677,13 +677,13 @@ public class BayesianStreamTunerClassifier extends AbstractClassifier
     public int getNumberOfCandidates() { return numberOfCandidatesOption.getValue(); }
 
     @Override
-    public long getStatesEvaluatedCount() { return instanceCount / gracePeriodOption.getValue(); }
+    public long getStatesEvaluatedCount() { return instanceCount / periodicityOption.getValue(); }
 
     @Override
-    public int getEvaluationInstancesCount() { return (int) (instanceCount % gracePeriodOption.getValue()); }
+    public int getEvaluationInstancesCount() { return (int) (instanceCount % periodicityOption.getValue()); }
 
     @Override
-    public int getGracePeriod() { return gracePeriodOption.getValue(); }
+    public int getPeriodicity() { return periodicityOption.getValue(); }
 
     @Override
     public Classifier getMainClassifier() { return candidates[bestCandidateIndex]; }

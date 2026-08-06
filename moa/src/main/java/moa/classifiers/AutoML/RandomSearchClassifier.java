@@ -72,7 +72,7 @@ public class RandomSearchClassifier extends AbstractClassifier implements MultiC
             "Search space as inline JSON. Takes precedence over configurationFile when set,"
             + " so that a caller holding the space in memory need not write a file.", "");
 
-    public IntOption gracePeriodOption = new IntOption("gracePeriod", 'g',
+    public IntOption periodicityOption = new IntOption("periodicity", 'g',
             "Number of instances between candidate evaluations.", 1000, 1, Integer.MAX_VALUE);
 
     public FlagOption randomInitialParametersOption = new FlagOption("randomInitialParameters", 'R',
@@ -471,7 +471,7 @@ public class RandomSearchClassifier extends AbstractClassifier implements MultiC
         //check for change in parameters
         this.evaluationInstances++;
 
-        if ((this.statesEvaluated == 0) || this.evaluationInstances >= this.gracePeriodOption.getValue()) {
+        if ((this.statesEvaluated == 0) || this.evaluationInstances >= this.periodicityOption.getValue()) {
             this.checkParameterChange();
             this.statesEvaluated++;
             this.evaluationInstances = 0;
@@ -582,7 +582,7 @@ public class RandomSearchClassifier extends AbstractClassifier implements MultiC
     public int getEvaluationInstancesCount() { return this.evaluationInstances; }
 
     @Override
-    public int getGracePeriod() { return this.gracePeriodOption.getValue(); }
+    public int getPeriodicity() { return this.periodicityOption.getValue(); }
 
     @Override
     public Classifier getMainClassifier() { return this.classifier; }

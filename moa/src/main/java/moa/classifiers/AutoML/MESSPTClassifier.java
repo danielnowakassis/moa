@@ -72,7 +72,7 @@ public class MESSPTClassifier extends AbstractClassifier implements MultiClassCl
             "Search space as inline JSON. Takes precedence over configurationFile when set,"
             + " so that a caller holding the space in memory need not write a file.", "");
 
-    public IntOption gracePeriodOption = new IntOption("gracePeriod", 'g',
+    public IntOption periodicityOption = new IntOption("periodicity", 'g',
             "Number of instances between DE updates.", 1000, 1, Integer.MAX_VALUE);
 
     public IntOption populationSizeOption = new IntOption("populationSize", 'p',
@@ -354,7 +354,7 @@ public class MESSPTClassifier extends AbstractClassifier implements MultiClassCl
             }
         }
 
-        if (evaluationInstances >= gracePeriodOption.getValue()) {
+        if (evaluationInstances >= periodicityOption.getValue()) {
             evaluationInstances = 0;
             updatePopulation();
 
@@ -606,13 +606,13 @@ public class MESSPTClassifier extends AbstractClassifier implements MultiClassCl
     public int getNumberOfCandidates() { return populationSizeOption.getValue(); }
 
     @Override
-    public long getStatesEvaluatedCount() { return instanceCount / gracePeriodOption.getValue(); }
+    public long getStatesEvaluatedCount() { return instanceCount / periodicityOption.getValue(); }
 
     @Override
     public int getEvaluationInstancesCount() { return evaluationInstances; }
 
     @Override
-    public int getGracePeriod() { return gracePeriodOption.getValue(); }
+    public int getPeriodicity() { return periodicityOption.getValue(); }
 
     @Override
     public Classifier getMainClassifier() { return population[0].model; }

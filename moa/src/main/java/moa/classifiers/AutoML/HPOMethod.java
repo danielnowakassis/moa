@@ -85,7 +85,7 @@ public interface HPOMethod {
 
     default int getEvaluationInstancesCount() { return 0; }
 
-    default int getGracePeriod() { return Integer.MAX_VALUE; }
+    default int getPeriodicity() { return Integer.MAX_VALUE; }
 
     default Classifier getMainClassifier() { return null; }
 
